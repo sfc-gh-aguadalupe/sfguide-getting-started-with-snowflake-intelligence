@@ -30,6 +30,8 @@ The two paths use different naming conventions (`si_*` vs `coco_*`), so you can 
 │   ├── 05_email_integration.sql
 │   ├── 06_cortex_search_setup.sql
 │   └── 07_cleanup.sql
+├── notebooks/                  # Jupyter notebooks
+│   └── sales_forecast_model.ipynb  # ML model training (bonus track)
 ├── marketing_campaigns.yaml    # Semantic model (Manual path)
 └── data/                       # Sample CSV files
 ```
@@ -53,7 +55,7 @@ The two paths use different naming conventions (`si_*` vs `coco_*`), so you can 
 | 8 | Add Cortex Search to agent |
 | 9 | Test with natural language queries |
 
-**Bonus tracks** (Cortex Code path): Sentiment analysis, Streamlit dashboards, semantic model extensions, automated reports.
+**Bonus tracks** (both paths): ML sales forecasting with Snowpark ML/XGBoost, sentiment analysis, Streamlit dashboards, semantic model extensions, automated reports.
 
 ## Resources
 

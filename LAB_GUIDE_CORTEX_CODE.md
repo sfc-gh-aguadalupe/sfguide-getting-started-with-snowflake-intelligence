@@ -274,7 +274,59 @@ Ask the agent: Summarize the main themes from support cases
 
 ## Bonus Tracks
 
-### Bonus 1: Sentiment Analysis
+### Bonus 1: ML Sales Forecasting Model (Optional)
+
+Train an XGBoost model using Snowpark ML to predict sales amounts. Let Cortex Code guide you through the process.
+
+**Option A: Create from Scratch**
+
+```
+Create a Jupyter notebook that trains a sales forecasting model using Snowpark ML:
+
+1. Load sales data joined with products from coco_db.retail
+2. Engineer features: extract month, day_of_week from the date, encode region and category
+3. Train an XGBoost regressor to predict sales_amount using:
+   - Features: region (encoded), category (encoded), month, day_of_week, units_sold
+   - Target: sales_amount
+4. Evaluate the model (show RMSE, MAE, R2)
+5. Register the model as "coco_sales_forecast" in the Snowflake Model Registry
+6. Create a UDF called "predict_sales" that takes region, category, month, and units_estimate as inputs and returns the predicted sales amount
+
+Use coco_db.retail for all tables.
+```
+
+**Option B: Import Pre-built Notebook**
+
+1. Navigate to **Notebooks** in Snowsight
+2. Click **+ Notebook** → **Import from file**
+3. Upload `notebooks/sales_forecast_model.ipynb` from this repo
+4. **IMPORTANT:** In cell 2, change these settings:
+   ```python
+   DATABASE = 'COCO_DB'  # Change from SI_DB
+   MODEL_NAME = 'coco_sales_forecast'  # Change from si_sales_forecast
+   ```
+5. Run all cells (2-3 minutes)
+
+**Add the Model to Your Agent:**
+
+```
+Add the predict_sales UDF from coco_db.retail to the Coco Retail Agent as a tool.
+The tool should be named "Sales Predictor" and described as "Predict sales amount given region, product category, month, and estimated units"
+```
+
+**Test the ML Tool:**
+
+```
+Ask the Coco Retail Agent: Predict sales for West region, Fitness Wear category, for September with 75 units
+```
+
+```
+Ask the agent: What would sales be for Electronics in the East region next month if we sell 100 units?
+```
+
+---
+
+### Bonus 2: Sentiment Analysis
 
 ```
 Using Cortex COMPLETE, analyze the support_cases transcripts in coco_db.retail. 
@@ -282,7 +334,7 @@ Classify each case as positive, negative, or neutral sentiment.
 Store results in a new table called "support_sentiment" with columns: case_id, sentiment, confidence_score.
 ```
 
-### Bonus 2: Build a Dashboard
+### Bonus 3: Build a Dashboard
 
 ```
 Create a Streamlit app for coco_db.retail data that shows:
@@ -292,7 +344,7 @@ Create a Streamlit app for coco_db.retail data that shows:
 4. Interactive filters for date range and category
 ```
 
-### Bonus 3: Extend the Semantic Model
+### Bonus 4: Extend the Semantic Model
 
 ```
 Add a calculated metric for Click-Through Rate (CTR) to the semantic model.
@@ -300,7 +352,7 @@ CTR = (clicks / impressions) * 100
 Update the YAML and re-upload to the stage.
 ```
 
-### Bonus 4: Automated Reports
+### Bonus 5: Automated Reports
 
 ```
 Create a Snowflake Task that runs weekly and:

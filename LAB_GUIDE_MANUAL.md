@@ -254,6 +254,53 @@ Try asking your agent these questions:
 
 ---
 
+## Bonus Tracks
+
+### Bonus: ML Sales Forecasting Model (Optional)
+
+Train an XGBoost model using Snowpark ML to predict sales amounts. The model can be added as a tool to your agent.
+
+**What You'll Build:**
+- XGBoost regression model trained on sales data
+- Model registered in Snowflake Model Registry
+- UDF for scoring that can be called by the agent
+
+**Instructions:**
+
+1. Navigate to **Notebooks** in Snowsight
+2. Click **+ Notebook** → **Import from file**
+3. Upload `notebooks/sales_forecast_model.ipynb` from this repo
+4. **IMPORTANT:** In cell 2, verify these settings:
+   ```python
+   DATABASE = 'SI_DB'  # Keep as-is for Manual path
+   MODEL_NAME = 'si_sales_forecast'  # Keep as-is for Manual path
+   ```
+5. Run all cells (this takes 2-3 minutes)
+6. Verify the model is registered:
+   ```sql
+   SHOW MODELS IN SI_DB.RETAIL;
+   ```
+
+**Add the Model to Your Agent:**
+
+1. Open your agent in Snowsight (Snowflake Intelligence > Retail Analytics Agent)
+2. Click **Edit** or **Configure**
+3. Navigate to the **Tools** section
+4. Click **+ Add Tool**
+5. Select **Function** as the tool type
+6. Configure the tool:
+   - **Function**: Select `SI_DB.RETAIL.PREDICT_SALES`
+   - **Description**: `Predict sales amount given region, product category, month, and estimated units`
+7. Click **Save**
+
+**Test the ML Tool:**
+
+Ask your agent:
+- "Predict sales for West region, Fitness Wear category, for September with 75 units"
+- "What would sales be for Electronics in the East region next month if we sell 100 units?"
+
+---
+
 ## Cleanup
 
 When you're done with the lab, clean up all created objects.
