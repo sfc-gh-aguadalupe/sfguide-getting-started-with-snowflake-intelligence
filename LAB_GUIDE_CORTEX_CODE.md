@@ -135,13 +135,13 @@ Show me the row count for each table in coco_db.retail
 
 ---
 
-### Step 4: Create Semantic Model
+### Step 4: Create Semantic Model and Semantic View
 
-**Goal:** Create a semantic model that describes the data relationships and enables natural language queries.
+**Goal:** Create a semantic model that describes the data relationships and enables natural language queries, then create a Semantic View so it appears in the Snowflake Intelligence UI.
 
 **Prompt:**
 ```
-Create a semantic model YAML file for the tables in coco_db.retail. The model should:
+Create a semantic model for the tables in coco_db.retail. The model should:
 
 1. Define all 4 main tables (marketing_campaign_metrics, products, sales, social_media) with their columns as dimensions, facts, and time_dimensions
 
@@ -153,14 +153,18 @@ Create a semantic model YAML file for the tables in coco_db.retail. The model sh
 
 4. Add one verified query example for: "Show me the trend of sales by product category between June 2025 and August 2025"
 
-Name the model "Coco_Retail_Analytics" and save it to a stage called "semantic_models" in coco_db.retail.
+Name the model "Coco_Retail_Analytics".
+
+IMPORTANT: After creating the YAML, also create a Semantic View from it using SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML. This is required for the database to appear in the Snowflake Intelligence agent creation UI.
 ```
 
-**What to observe:** This is the key step - watch Cortex Code build a complete semantic model from the table structures.
+**What to observe:** This is the key step - watch Cortex Code build a complete semantic model from the table structures, then convert it to a Semantic View object.
+
+> **Important:** The Snowflake Intelligence UI only shows databases that have **Semantic Views** (not just YAML files on a stage). The `SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML` stored procedure creates the required Semantic View object.
 
 **Verification prompt:**
 ```
-List files in the @coco_db.retail.semantic_models stage
+Show semantic views in coco_db
 ```
 
 ---
@@ -208,16 +212,18 @@ Show Cortex Search services in coco_db.retail
 
 ### Step 7: Create the Agent
 
-**Goal:** Create a Snowflake Intelligence agent using the semantic model.
+**Goal:** Create a Snowflake Intelligence agent using the semantic view.
 
 **Prompt:**
 ```
 Help me create a Snowflake Intelligence agent:
 - Name: "Coco Retail Agent"
-- Use the semantic model from @coco_db.retail.semantic_models
+- Use the semantic view "Coco_Retail_Analytics" from coco_db.retail
 - Use warehouse coco_wh
 - Store it in coco_agents_db.agents schema
 ```
+
+> **Note:** If you prefer to use the UI, go to **Snowflake Intelligence** in Snowsight and click **Create agent**. The `COCO_DB` database should now appear in the dropdown because it has a Semantic View.
 
 ---
 

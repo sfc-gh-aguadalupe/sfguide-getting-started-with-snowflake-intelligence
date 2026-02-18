@@ -4,7 +4,8 @@
 -- This script uses Git integration to pull the semantic model YAML file
 -- from GitHub and stores it in a Snowflake stage.
 --
--- Use this option if you want automatic syncing with the GitHub repo.
+-- PREREQUISITE: Run scripts/04c_git_integration_setup.sql first to create
+-- the Git integration (secret, API integration, and repository).
 -- ============================================================================
 
 USE ROLE si_admin;
@@ -17,23 +18,210 @@ CREATE OR REPLACE STAGE semantic_models
     ENCRYPTION = (TYPE = 'SNOWFLAKE_SSE')
     DIRECTORY = (ENABLE = TRUE);
 
--- Create Git API integration
-CREATE OR REPLACE API INTEGRATION si_git_api_integration
-    API_PROVIDER = git_https_api
-    API_ALLOWED_PREFIXES = ('https://github.com/Snowflake-Labs')
-    ENABLED = TRUE;
-
--- Create Git repository connection
-CREATE OR REPLACE GIT REPOSITORY si_git_repo
-    API_INTEGRATION = si_git_api_integration
-    ORIGIN = 'https://github.com/Snowflake-Labs/sfguide-getting-started-with-snowflake-intelligence';
+-- Fetch latest from Git repository (created in 04c_git_integration_setup.sql)
+ALTER GIT REPOSITORY lab_repo FETCH;
 
 -- Copy semantic model from Git repo to stage
 COPY FILES INTO @semantic_models
-    FROM @si_git_repo/branches/main/
+    FROM @lab_repo/branches/main/
     FILES = ('marketing_campaigns.yaml');
 
 -- Verify the file was copied
 LIST @semantic_models;
 
-SELECT 'Step 4 Complete: Semantic model uploaded via Git integration!' AS status;
+-- ============================================================================
+-- Create the Semantic View from the YAML specification
+-- This is REQUIRED for the database to appear in Snowflake Intelligence UI
+-- ============================================================================
+CALL SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML(
+  'si_db.retail',
+  $$name: Sales_And_Marketing_Data
+tables:
+  - name: MARKETING_CAMPAIGN_METRICS
+    base_table:
+      database: SI_DB
+      schema: RETAIL
+      table: MARKETING_CAMPAIGN_METRICS
+    primary_key:
+      columns:
+        - CATEGORY
+    dimensions:
+      - name: CAMPAIGN_NAME
+        synonyms:
+          - ad_campaign
+          - marketing_campaign
+          - promo_name
+        description: The name of the marketing campaign.
+        expr: CAMPAIGN_NAME
+        data_type: VARCHAR(16777216)
+      - name: CATEGORY
+        synonyms:
+          - type
+          - classification
+          - group
+        description: The category of the marketing campaign.
+        expr: CATEGORY
+        data_type: VARCHAR(16777216)
+    facts:
+      - name: CLICKS
+        synonyms:
+          - click_throughs
+          - ad_clicks
+        description: The total number of times users clicked on an advertisement.
+        expr: CLICKS
+        data_type: NUMBER(38,0)
+      - name: IMPRESSIONS
+        synonyms:
+          - views
+          - ad_views
+        description: The total number of times an ad was displayed.
+        expr: IMPRESSIONS
+        data_type: NUMBER(38,0)
+    time_dimensions:
+      - name: DATE
+        synonyms:
+          - day
+          - calendar_date
+        description: Date on which the marketing campaign metrics were recorded.
+        expr: DATE
+        data_type: DATE
+  - name: PRODUCTS
+    base_table:
+      database: SI_DB
+      schema: RETAIL
+      table: PRODUCTS
+    primary_key:
+      columns:
+        - PRODUCT_ID
+    dimensions:
+      - name: CATEGORY
+        synonyms:
+          - type
+          - product_type
+        description: The CATEGORY column represents the type of product being sold.
+        expr: CATEGORY
+        data_type: VARCHAR(16777216)
+      - name: PRODUCT_ID
+        synonyms:
+          - product_key
+          - item_id
+        description: Unique identifier for each product in the catalog.
+        expr: PRODUCT_ID
+        data_type: NUMBER(38,0)
+      - name: PRODUCT_NAME
+        synonyms:
+          - item_name
+          - product_title
+        description: The name of the product being sold.
+        expr: PRODUCT_NAME
+        data_type: VARCHAR(16777216)
+  - name: SALES
+    base_table:
+      database: SI_DB
+      schema: RETAIL
+      table: SALES
+    dimensions:
+      - name: PRODUCT_ID
+        synonyms:
+          - product_code
+          - item_id
+        description: Unique identifier for a product sold.
+        expr: PRODUCT_ID
+        data_type: NUMBER(38,0)
+      - name: REGION
+        synonyms:
+          - area
+          - territory
+        description: Geographic region where the sale was made.
+        expr: REGION
+        data_type: VARCHAR(16777216)
+    facts:
+      - name: SALES_AMOUNT
+        synonyms:
+          - total_sales
+          - revenue
+        description: The total amount of sales generated from a transaction.
+        expr: SALES_AMOUNT
+        data_type: NUMBER(38,2)
+      - name: UNITS_SOLD
+        synonyms:
+          - quantity_sold
+          - items_sold
+        description: The total quantity of products sold.
+        expr: UNITS_SOLD
+        data_type: NUMBER(38,0)
+    time_dimensions:
+      - name: DATE
+        synonyms:
+          - day
+          - sale_date
+        description: Date of sale.
+        expr: DATE
+        data_type: DATE
+  - name: SOCIAL_MEDIA
+    base_table:
+      database: SI_DB
+      schema: RETAIL
+      table: SOCIAL_MEDIA
+    dimensions:
+      - name: CATEGORY
+        synonyms:
+          - type
+          - classification
+        description: The category of social media content.
+        expr: CATEGORY
+        data_type: VARCHAR(16777216)
+      - name: INFLUENCER
+        synonyms:
+          - content_creator
+          - brand_ambassador
+        description: The name of the social media influencer.
+        expr: INFLUENCER
+        data_type: VARCHAR(16777216)
+      - name: PLATFORM
+        synonyms:
+          - channel
+          - social_media_channel
+        description: The social media platform.
+        expr: PLATFORM
+        data_type: VARCHAR(16777216)
+    facts:
+      - name: MENTIONS
+        synonyms:
+          - citations
+          - references
+        description: The number of times a brand is mentioned on social media.
+        expr: MENTIONS
+        data_type: NUMBER(38,0)
+    time_dimensions:
+      - name: DATE
+        synonyms:
+          - day
+          - posting_date
+        description: Date on which social media data was collected.
+        expr: DATE
+        data_type: DATE
+relationships:
+  - name: SALES_TO_PRODUCT
+    left_table: SALES
+    right_table: PRODUCTS
+    relationship_columns:
+      - left_column: PRODUCT_ID
+        right_column: PRODUCT_ID
+    relationship_type: many_to_one
+    join_type: inner
+  - name: MARKETING_TO_SOCIAL
+    left_table: SOCIAL_MEDIA
+    right_table: MARKETING_CAMPAIGN_METRICS
+    relationship_columns:
+      - left_column: CATEGORY
+        right_column: CATEGORY
+    relationship_type: many_to_one
+    join_type: inner
+$$
+);
+
+-- Verify semantic view was created
+SHOW SEMANTIC VIEWS IN DATABASE si_db;
+
+SELECT 'Step 4 Complete: Semantic model uploaded and Semantic View created!' AS status;

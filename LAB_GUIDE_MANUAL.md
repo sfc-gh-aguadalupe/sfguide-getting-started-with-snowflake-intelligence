@@ -119,20 +119,24 @@ UNION ALL SELECT 'support_cases', COUNT(*) FROM si_db.retail.support_cases;
 
 ---
 
-### Step 4: Setup Semantic Model
+### Step 4: Setup Semantic Model and Semantic View
 
-The semantic model defines how your data is structured and related, enabling the AI agent to understand your data.
+The semantic model defines how your data is structured and related, enabling the AI agent to understand your data. A **Semantic View** must be created from the YAML for the database to appear in the Snowflake Intelligence UI.
 
 **Choose one option:**
 
 #### Option A: Git Integration (Recommended)
 
-Use this if your account supports Git integration.
+Use this if your account supports Git integration and you have already set up a Git repository in Snowflake.
 
 1. Open `scripts/04a_semantic_model_git.sql`
 2. Copy and paste into your Snowsight worksheet
 3. Run all statements
-4. Verify the YAML file appears in the stage listing
+4. The script will:
+   - Copy the YAML file from Git to a stage
+   - Create a **Semantic View** using `SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML`
+
+> **Note:** Git integration requires a one-time setup of a secret, API integration, and Git repository object. Ask your administrator if this is configured.
 
 #### Option B: Manual Upload
 
@@ -140,8 +144,8 @@ Use this if Git integration is not available or you prefer manual control.
 
 1. Open `scripts/04b_semantic_model_manual.sql`
 2. Copy and paste into your Snowsight worksheet
-3. Run all statements to create the stage
-4. Upload the semantic model file:
+3. Run all statements to create the stage and **Semantic View**
+4. Optionally upload the YAML file for reference:
    - Navigate to **Data > Databases > SI_DB > RETAIL > Stages**
    - Click on **SEMANTIC_MODELS** stage
    - Click **+ Files** button
@@ -151,10 +155,13 @@ Use this if Git integration is not available or you prefer manual control.
 **Verification:**
 
 ```sql
-LIST @si_db.retail.semantic_models;
+-- Verify Semantic View was created (REQUIRED for agent creation UI)
+SHOW SEMANTIC VIEWS IN SI_DB;
 ```
 
-You should see `marketing_campaigns.yaml` in the listing.
+You should see `SALES_AND_MARKETING_DATA` listed. This is what makes `SI_DB` appear in the Snowflake Intelligence agent creation dropdown.
+
+> **Important:** The Snowflake Intelligence UI only shows databases that have **Semantic Views** (not just YAML files on a stage). If your database doesn't appear in the dropdown, ensure the Semantic View was created successfully.
 
 ---
 
@@ -210,10 +217,13 @@ Now we'll create an AI agent that can answer questions about your retail data!
 1. Navigate to **Snowflake Intelligence** in Snowsight (left sidebar)
 2. Click **+ Create Agent**
 3. Configure the agent:
+   - **Database**: Select `SI_DB` (it should appear because it has a Semantic View)
+   - **Semantic View**: Select `SALES_AND_MARKETING_DATA`
    - **Name**: `Retail Analytics Agent`
-   - **Semantic Model**: Select `@si_db.retail.semantic_models/marketing_campaigns.yaml`
    - **Warehouse**: `si_wh`
 4. Click **Create**
+
+> **Troubleshooting:** If `SI_DB` doesn't appear in the database dropdown, go back to Step 4 and verify the Semantic View was created: `SHOW SEMANTIC VIEWS IN SI_DB;`
 
 ---
 
