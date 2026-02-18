@@ -9,13 +9,13 @@
 --   - support_cases: Customer support tickets
 -- ============================================================================
 
-USE ROLE snowflake_intelligence_admin;
-USE DATABASE dash_db_si;
+USE ROLE si_admin;
+USE DATABASE si_db;
 USE SCHEMA retail;
-USE WAREHOUSE dash_wh_si;
+USE WAREHOUSE si_wh;
 
 -- Create file format for CSV loading
-CREATE OR REPLACE FILE FORMAT swt_csvformat
+CREATE OR REPLACE FILE FORMAT si_csvformat
     SKIP_HEADER = 1
     FIELD_OPTIONALLY_ENCLOSED_BY = '"'
     TYPE = 'CSV';

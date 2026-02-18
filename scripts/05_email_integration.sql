@@ -5,13 +5,13 @@
 -- that can be used by agents to send email notifications.
 -- ============================================================================
 
-USE ROLE snowflake_intelligence_admin;
-USE DATABASE dash_db_si;
+USE ROLE si_admin;
+USE DATABASE si_db;
 USE SCHEMA retail;
-USE WAREHOUSE dash_wh_si;
+USE WAREHOUSE si_wh;
 
 -- Create email notification integration
-CREATE OR REPLACE NOTIFICATION INTEGRATION email_integration
+CREATE OR REPLACE NOTIFICATION INTEGRATION si_email_integration
     TYPE = EMAIL
     ENABLED = TRUE
     DEFAULT_SUBJECT = 'Snowflake Intelligence';
@@ -37,7 +37,7 @@ def send_email(session, recipient_email, subject, body):
         # Execute the system procedure call
         session.sql(f"""
             CALL SYSTEM$SEND_EMAIL(
-                'email_integration',
+                'si_email_integration',
                 '{recipient_email}',
                 '{subject}',
                 '{escaped_body}',

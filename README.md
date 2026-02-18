@@ -2,55 +2,66 @@
 
 A hands-on lab for building AI-powered agents with Snowflake Intelligence.
 
-## Quick Start
+## Choose Your Path
 
-**Choose your path:**
+| Path | Guide | Time | Naming | Description |
+|------|-------|------|--------|-------------|
+| **Manual** | [LAB_GUIDE_MANUAL.md](LAB_GUIDE_MANUAL.md) | ~45 min | `si_*` | Copy/paste SQL scripts into Snowsight |
+| **Cortex Code** | [LAB_GUIDE_CORTEX_CODE.md](LAB_GUIDE_CORTEX_CODE.md) | ~25 min | `coco_*` | Goal-based prompts, AI generates solutions |
 
-| Path | Command/Action |
-|------|----------------|
-| **Manual** | Open [LAB_GUIDE.md](LAB_GUIDE.md) and follow the Manual instructions |
-| **Cortex Code** | Open [LAB_GUIDE.md](LAB_GUIDE.md) and use the provided prompts |
+### Run Both in Parallel
+
+The two paths use different naming conventions (`si_*` vs `coco_*`), so you can run both simultaneously and compare:
+- How Cortex Code generates SQL vs hand-written scripts
+- Semantic model differences (synonyms, descriptions)
+- Agent response quality
 
 ## What's Included
 
 ```
-├── LAB_GUIDE.md              # Step-by-step lab instructions
-├── scripts/                   # Modular SQL scripts
+├── LAB_GUIDE_MANUAL.md        # Step-by-step SQL scripts
+├── LAB_GUIDE_CORTEX_CODE.md   # Goal-based AI prompts + bonus tracks
+├── scripts/                    # SQL scripts (Manual path only)
 │   ├── 01_setup_roles_warehouse.sql
 │   ├── 02_create_tables.sql
 │   ├── 03_load_data.sql
-│   ├── 04_semantic_model_setup.sql
+│   ├── 04a_semantic_model_git.sql
+│   ├── 04b_semantic_model_manual.sql
 │   ├── 05_email_integration.sql
-│   └── 06_cleanup.sql
-├── marketing_campaigns.yaml   # Semantic model definition
-└── data/                      # Sample CSV data files
+│   ├── 06_cortex_search_setup.sql
+│   └── 07_cleanup.sql
+├── marketing_campaigns.yaml    # Semantic model (Manual path)
+└── data/                       # Sample CSV files
 ```
 
 ## Prerequisites
 
 - Snowflake account with `ACCOUNTADMIN` access
-- (Optional) Cortex Code CLI for automated path
+- For Cortex Code path: Cortex Code CLI installed
 
 ## Lab Overview
 
-| Step | Description | Time |
-|------|-------------|------|
-| 1 | Setup roles, warehouse & databases | 5 min |
-| 2 | Create tables | 2 min |
-| 3 | Load data from S3 | 3 min |
-| 4 | Setup semantic model | 5 min |
-| 5 | Email integration (optional) | 3 min |
-| 6 | Create AI agent | 10 min |
-| 7 | Test your agent | 10 min |
+| Step | Description |
+|------|-------------|
+| 1 | Setup roles, warehouse & databases |
+| 2 | Create tables for retail analytics |
+| 3 | Load data from S3 |
+| 4 | Create/generate semantic model |
+| 5 | Email integration (optional) |
+| 6 | Cortex Search service for support trends |
+| 7 | Create AI agent |
+| 8 | Add Cortex Search to agent |
+| 9 | Test with natural language queries |
 
-**Bonus tracks** include: Cortex AI sentiment analysis, Streamlit dashboards, extending semantic models, and automated reports.
+**Bonus tracks** (Cortex Code path): Sentiment analysis, Streamlit dashboards, semantic model extensions, automated reports.
 
 ## Resources
 
-- [Full Lab Guide](LAB_GUIDE.md)
 - [Snowflake Intelligence Documentation](https://docs.snowflake.com)
+- [Cortex Code Documentation](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-code)
 - [Original QuickStart](https://quickstarts.snowflake.com/guide/getting-started-with-snowflake-intelligence/index.html)
 
 ## Cleanup
 
-Run `scripts/06_cleanup.sql` to remove all lab objects when finished.
+- **Manual path:** Run `scripts/07_cleanup.sql`
+- **Cortex Code path:** Ask Cortex Code to drop all `coco_*` objects
